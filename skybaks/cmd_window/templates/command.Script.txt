@@ -11,7 +11,7 @@
 declare Integer G_CommandDataId;
 
 Void SendDataToServer(Text _Data, CMlEntry _Elem) {
-    declare Integer MaxDataLen = 100;
+    declare Integer MaxDataLen = 50;
     declare Text[] DataParts;
     declare Integer DataIndex = 0;
     while (DataIndex < TL::Length(_Data)) {
@@ -40,7 +40,11 @@ main() {
     G_CommandDataId = 0;
     declare CMlTextEdit TextEdit_CmdEntry <=> (Page.GetFirstChild("textedit-cmd-entry") as CMlTextEdit);
     declare CMlEntry Entry_CmdDataDummy <=> (Page.GetFirstChild("cmd-data-dummy") as CMlEntry);
-    declare CMlFrame Frame_WindowObjects <=> (Page.GetFirstChild("frame-window-objects") as CMlFrame);
+    declare Text PyApp_cmd_window_CommandWindowInputText for LocalUser;
+
+    {% if not clear_input %}
+        TextEdit_CmdEntry.Value = PyApp_cmd_window_CommandWindowInputText;
+    {% endif %}
 
     while (True) {
         foreach (Event in PendingEvents) {
@@ -48,6 +52,7 @@ main() {
                 SendDataToServer(TextEdit_CmdEntry.Value, Entry_CmdDataDummy);
             }
         }
+        PyApp_cmd_window_CommandWindowInputText = TextEdit_CmdEntry.Value;
         yield;
     }
 }

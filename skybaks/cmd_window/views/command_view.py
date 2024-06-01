@@ -12,7 +12,7 @@ class PiecemealCommand:
         self.parts: "list[str | None]" = [None] * self.count
 
     @property
-    def valid(self) -> bool:
+    def complete(self) -> bool:
         return all(self.parts)
 
     @property
@@ -34,8 +34,23 @@ class CommandView(TemplateView):
         self.manager = app.context.ui
         self.tag = "cmd_window.views.command_view_displayed"
         self.cmds: "dict[int, PiecemealCommand]" = dict()
+        self.window_minimized: bool = False
+        self.clear_input: bool = True
         self.subscribe("cmd_button_close", self.close)
+        self.subscribe("cmd_button_minmax", self.toggle_minmax)
         self.subscribe("cmd_transmit_server_data", self.receive_command_data)
+
+    async def get_context_data(self):
+        context = await super().get_context_data()
+        context.update({
+            "title": "Pyplanet: Command Window",
+            "minmax_button_substyle": "Windowed" if self.window_minimized else "Minimize",
+            "minimized": self.window_minimized,
+            "clear_input": self.clear_input,
+        })
+        # Ensure clear_input is only set once
+        self.clear_input = False
+        return context
 
     async def refresh(self, player, *args, **kwargs):
         await self.display(player=player)
@@ -69,6 +84,10 @@ class CommandView(TemplateView):
         await self.hide(player_logins=[player.login])
         player.attributes.set(self.tag, None)
 
+    async def toggle_minmax(self, player, *args, **kwargs):
+        self.window_minimized = not self.window_minimized
+        await self.refresh(player=player)
+
     async def receive_command_data(self, player, action: str, values: dict, *args, **kwargs):
         cmd_data = json.loads(values.get("cmd", "{}"))
         if cmd_data:
@@ -80,8 +99,8 @@ class CommandView(TemplateView):
                 self.cmds[cmd_id] = PiecemealCommand(cmd_maxcount)
             self.cmds[cmd_id].set_part(cmd_index, cmd_text_data)
 
-            if self.cmds[cmd_id].valid:
-                logger.info("got command:\n" + self.cmds[cmd_id].command)
+            if self.cmds[cmd_id].complete:
+                await self.app.instance.command_manager.execute(player, self.cmds[cmd_id].command)
                 del self.cmds[cmd_id]
-            else:
-                logger.info("cmd not yet valid")
+                self.clear_input = True
+                await self.refresh(player=player)
