@@ -4,14 +4,14 @@
 #Struct K_ServerData {
     Integer ID;
     Text Data;
-    Integer Number;
-    Integer Max;
+    Integer Index;
+    Integer Count;
 }
 
-declare Integer G_CommandDataId = 0;
+declare Integer G_CommandDataId;
 
 Void SendDataToServer(Text _Data, CMlEntry _Elem) {
-    declare Integer MaxDataLen = 10;
+    declare Integer MaxDataLen = 100;
     declare Text[] DataParts;
     declare Integer DataIndex = 0;
     while (DataIndex < TL::Length(_Data)) {
@@ -24,25 +24,28 @@ Void SendDataToServer(Text _Data, CMlEntry _Elem) {
         declare ServerData = K_ServerData {
             ID = G_CommandDataId,
             Data = Part,
-            Number = Index + 1,
-            Max = DataParts.count
+            Index = Index,
+            Count = DataParts.count
         };
 
-        Entry_CmdDataDummy.SetText(ServerData.tojson(), False);
-        TriggerPageAction("cmd-transmit-server-data");
+        _Elem.SetText(ServerData.tojson(), False);
+        TriggerPageAction("{{ id }}__cmd_transmit_server_data");
     }
+    _Elem.SetText("", False);
 
     G_CommandDataId = G_CommandDataId + 1;
 }
 
 main() {
+    G_CommandDataId = 0;
     declare CMlTextEdit TextEdit_CmdEntry <=> (Page.GetFirstChild("textedit-cmd-entry") as CMlTextEdit);
     declare CMlEntry Entry_CmdDataDummy <=> (Page.GetFirstChild("cmd-data-dummy") as CMlEntry);
+    declare CMlFrame Frame_WindowObjects <=> (Page.GetFirstChild("frame-window-objects") as CMlFrame);
 
     while (True) {
         foreach (Event in PendingEvents) {
             if (Event.Type == CMlScriptEvent::Type::MouseClick && Event.ControlId == "button-execute-cmd") {
-                SendDataToServer("012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678", Entry_CmdDataDummy);
+                SendDataToServer(TextEdit_CmdEntry.Value, Entry_CmdDataDummy);
             }
         }
         yield;
