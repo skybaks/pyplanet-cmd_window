@@ -1,0 +1,50 @@
+
+#Include "TextLib" as TL
+
+#Struct K_ServerData {
+    Integer ID;
+    Text Data;
+    Integer Number;
+    Integer Max;
+}
+
+declare Integer G_CommandDataId = 0;
+
+Void SendDataToServer(Text _Data, CMlEntry _Elem) {
+    declare Integer MaxDataLen = 10;
+    declare Text[] DataParts;
+    declare Integer DataIndex = 0;
+    while (DataIndex < TL::Length(_Data)) {
+        declare Text NextDataPart = TL::SubString(_Data, DataIndex, MaxDataLen);
+        DataIndex = DataIndex + TL::Length(NextDataPart);
+        DataParts.add(NextDataPart);
+    }
+
+    foreach (Index => Part in DataParts) {
+        declare ServerData = K_ServerData {
+            ID = G_CommandDataId,
+            Data = Part,
+            Number = Index + 1,
+            Max = DataParts.count
+        };
+
+        Entry_CmdDataDummy.SetText(ServerData.tojson(), False);
+        TriggerPageAction("cmd-transmit-server-data");
+    }
+
+    G_CommandDataId = G_CommandDataId + 1;
+}
+
+main() {
+    declare CMlTextEdit TextEdit_CmdEntry <=> (Page.GetFirstChild("textedit-cmd-entry") as CMlTextEdit);
+    declare CMlEntry Entry_CmdDataDummy <=> (Page.GetFirstChild("cmd-data-dummy") as CMlEntry);
+
+    while (True) {
+        foreach (Event in PendingEvents) {
+            if (Event.Type == CMlScriptEvent::Type::MouseClick && Event.ControlId == "button-execute-cmd") {
+                SendDataToServer("012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678012345678", Entry_CmdDataDummy);
+            }
+        }
+        yield;
+    }
+}
