@@ -48,7 +48,11 @@ main() {
 
     while (True) {
         foreach (Event in PendingEvents) {
-            if (Event.Type == CMlScriptEvent::Type::MouseClick && Event.ControlId == "button-execute-cmd") {
+            if ((Event.Type == CMlScriptEvent::Type::MouseClick && Event.ControlId == "button-execute-cmd")
+            || (Event.Type == CMlScriptEvent::Type::EntrySubmit && Event.ControlId == "textedit-cmd-entry")) {
+                // Force the focus to leave the textedit and therefore we can get to the value
+                TextEdit_CmdEntry.Hide();
+                TextEdit_CmdEntry.Show();
                 SendDataToServer(TextEdit_CmdEntry.Value, Entry_CmdDataDummy);
             }
         }

@@ -36,7 +36,8 @@ class CommandView(TemplateView):
         self.cmds: "dict[int, PiecemealCommand]" = dict()
         self.window_minimized: bool = False
         self.clear_input: bool = True
-        self.subscribe("cmd_button_close", self.close)
+        self.closed: bool = False
+        self.subscribe("cmd_button_close", self.exit)
         self.subscribe("cmd_button_minmax", self.toggle_minmax)
         self.subscribe("cmd_transmit_server_data", self.receive_command_data)
 
@@ -53,9 +54,12 @@ class CommandView(TemplateView):
         return context
 
     async def refresh(self, player, *args, **kwargs):
+        if self.closed:
+            return
         await self.display(player=player)
 
     async def display(self, player=None):
+        self.closed = False
         login = player.login if isinstance(player, Player) else player
         if not player:
             raise Exception("No player/login given to display to")
@@ -83,6 +87,10 @@ class CommandView(TemplateView):
             del self.player_data[player.login]
         await self.hide(player_logins=[player.login])
         player.attributes.set(self.tag, None)
+
+    async def exit(self, player, *args, **kwargs):
+        self.closed = True
+        await self.close(player)
 
     async def toggle_minmax(self, player, *args, **kwargs):
         self.window_minimized = not self.window_minimized
