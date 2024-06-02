@@ -37,13 +37,14 @@ Void SendDataToServer(Text _Data, CMlEntry _Elem) {
 }
 
 main() {
-    G_CommandDataId = 0;
     declare CMlTextEdit TextEdit_CmdEntry <=> (Page.GetFirstChild("textedit-cmd-entry") as CMlTextEdit);
     declare CMlEntry Entry_CmdDataDummy <=> (Page.GetFirstChild("cmd-data-dummy") as CMlEntry);
     declare Text PyApp_cmd_window_CommandWindowInputText for LocalUser;
+    declare Integer PyApp_cmd_window_CommandWindowDataId for LocalUser;
+    G_CommandDataId = PyApp_cmd_window_CommandWindowDataId;
 
     {% if not clear_input %}
-        TextEdit_CmdEntry.Value = PyApp_cmd_window_CommandWindowInputText;
+    TextEdit_CmdEntry.Value = PyApp_cmd_window_CommandWindowInputText;
     {% endif %}
 
     while (True) {
@@ -57,6 +58,7 @@ main() {
             }
         }
         PyApp_cmd_window_CommandWindowInputText = TextEdit_CmdEntry.Value;
+        PyApp_cmd_window_CommandWindowDataId = G_CommandDataId;
         yield;
     }
 }

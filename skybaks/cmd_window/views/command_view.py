@@ -39,6 +39,7 @@ class CommandView(TemplateView):
         self.closed: bool = False
         self.subscribe("cmd_button_close", self.exit)
         self.subscribe("cmd_button_minmax", self.toggle_minmax)
+        self.subscribe("cmd_button_clear", self.clear_input_command)
         self.subscribe("cmd_transmit_server_data", self.receive_command_data)
 
     async def get_context_data(self):
@@ -96,6 +97,10 @@ class CommandView(TemplateView):
         self.window_minimized = not self.window_minimized
         await self.refresh(player=player)
 
+    async def clear_input_command(self, player, *args, **kwargs):
+        self.clear_input = True
+        await self.refresh(player)
+
     async def receive_command_data(self, player, action: str, values: dict, *args, **kwargs):
         cmd_data = json.loads(values.get("cmd", "{}"))
         if cmd_data:
@@ -108,7 +113,12 @@ class CommandView(TemplateView):
             self.cmds[cmd_id].set_part(cmd_index, cmd_text_data)
 
             if self.cmds[cmd_id].complete:
-                await self.app.instance.command_manager.execute(player, self.cmds[cmd_id].command)
-                del self.cmds[cmd_id]
                 self.clear_input = True
                 await self.refresh(player=player)
+                command = self.cmds[cmd_id].command
+                trimmed_command = command[:50]
+                if len(command) > 50:
+                    trimmed_command += "..."
+                await self.app.instance.chat(f"$0cfExecuting: $<$fff{trimmed_command}$>", player)
+                await self.app.instance.command_manager.execute(player, command)
+                del self.cmds[cmd_id]

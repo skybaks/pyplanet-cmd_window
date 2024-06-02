@@ -16,10 +16,10 @@ class CmdWindowApp(AppConfig):
 
     async def on_start(self) -> None:
         await self.instance.command_manager.register(
-            Command(command="cmd", target=self._command_cmd, description="Open the command window. Used for sending commands to the server longer than the chat message limit.")
+            Command(command="cmd", target=self._command_cmd,
+                    description="Open the command window. Used for sending commands to the server longer than the chat message limit")
         )
 
     async def _command_cmd(self, player, data, **kwargs) -> None:
-        logger.debug("Called _command_cmd")
         view = CommandView(self)
         await view.display(player)

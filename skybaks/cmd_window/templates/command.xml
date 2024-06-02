@@ -5,7 +5,7 @@
   {% else %}
     size="220 70"
   {% endif %}
-    z-index="-50" halign="center" valign="top" style="Bgs1InRace" substyle="BgCardList" scriptevents="1"/>
+    z-index="-50" halign="center" valign="top" style="Bgs1InRace" substyle="BgCardList" />
   <label pos="-99 -3.5" size="150 7" z-index="2" text="$o{{ title }}" textsize="2.5" textcolor="FFFFFFF" halign="left"/>
   <quad pos="-108 -2" size="7 7" z-index="1" style="Icons128x128_1" substyle="Launch" />
   <quad pos="0 -1" size="218 9" z-index="-49" halign="center" valign="top" style="Bgs1InRace" substyle="BgCardList"/>
@@ -13,9 +13,10 @@
   <quad pos="93 -2" size="7 7" z-index="1" style="Icons128x32_1" substyle="{{ minmax_button_substyle }}" action="{{ id }}__cmd_button_minmax" />
 
   {% if not minimized %}
-    <textedit id="textedit-cmd-entry" pos="4 -11" size="209 49" z-index="-40" halign="center" valign="top" autonewline="1" maxline="1" scriptevents="1" />
-    <label pos="-109 -11" z-index="0" size="8 5" text=">>>" halign="left" valign="top"/>
-    <label id="button-execute-cmd" pos="89.5 -65" z-index="0" size="37 6" text="Execute" halign="center" valign="center2" focusareacolor1="aaa5" focusareacolor2="aaa7" scriptevents="1"/>
+    <label pos="-109 -11" z-index="0" size="8 5" text="►" halign="left" valign="top"/>
+    <textedit id="textedit-cmd-entry" pos="-11 -11" size="186 58" z-index="-40" halign="center" valign="top" autonewline="1" maxline="1" scriptevents="1" />
+    <label pos="96 -17" z-index="0" size="26 12" text="$<✖$> Clear" halign="center" valign="center2" focusareacolor1="aaa5" focusareacolor2="aaa7" action="{{ id }}__cmd_button_clear"/>
+    <label id="button-execute-cmd" pos="96 -46.5" z-index="0" size="26 45" text="$<$o↲$> Enter" halign="center" valign="center2" focusareacolor1="aaa5" focusareacolor2="aaa7" scriptevents="1"/>
     <!--Use this entry as a dummy element to send data back to the server in the rpc response ManialinkPageAnswer-->
     <entry id="cmd-data-dummy" hidden="1" name="cmd" />
   {% endif %}
